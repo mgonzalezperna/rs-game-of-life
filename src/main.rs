@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use tui::backend::CrosstermBackend;
 use tui::Terminal;
 use tui::widgets::{Paragraph, Block, Borders, BorderType, Tabs};
+use tui::widgets::canvas::{Canvas, Map, MapResolution, Line, Rectangle};
 use tui::style::{Color, Style, Modifier};
 use tui::layout::Alignment;
 use tui::text::{Span, Spans};
@@ -102,7 +103,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     terminal.clear()?;
 
     // Finally we can add the elements to be render on the screen.
-
     let menu_titles = vec!["Preparation", "Run", "Quit"];
 
     // Default option to be selected when app starts
@@ -162,9 +162,36 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             rect.render_widget(tabs, chunks[0]);
 
+            // Draws a map when Preparation is selected.
+            let draw = Canvas::default()
+                .block(Block::default().title("Canvas").borders(Borders::ALL))
+                .x_bounds([-180.0, 180.0])
+                .y_bounds([-90.0, 90.0])
+                .paint(|ctx| {
+                    ctx.draw(&Map {
+                        resolution: MapResolution::High,
+                        color: Color::White
+                    });
+                    ctx.layer();
+                    ctx.draw(&Line {
+                        x1: 0.0,
+                        y1: 10.0,
+                        x2: 10.0,
+                        y2: 10.0,
+                        color: Color::White,
+                    });
+                    ctx.draw(&Rectangle {
+                        x: 10.0,
+                        y: 20.0,
+                        width: 10.0,
+                        height: 10.0,
+                        color: Color::Red
+                    });
+                });
+
             match active_menu_item {
                 MenuItem::Home => rect.render_widget(render_home(), chunks[1]),
-                MenuItem::Preparation=> {},
+                MenuItem::Preparation=> {rect.render_widget(draw, chunks[1])},
                 MenuItem::Run => {}
             }
         });
