@@ -1,11 +1,9 @@
-use crate::gol::models::Cell;
 use crate::user_interface::grid::Grid;
 use core::time::Duration;
 use crossterm::event::{self, EnableMouseCapture, Event, KeyCode, KeyEvent, MouseEvent};
 use crossterm::execute;
 use std::sync::mpsc::{Receiver, RecvError, Sender};
 use std::time::Instant;
-use std::usize;
 use tui::layout::Alignment;
 use tui::style::{Color, Modifier, Style};
 use tui::text::{Span, Spans};
@@ -20,21 +18,10 @@ pub enum GoLEvent {
 
 #[derive(Copy, Clone, Debug)]
 pub enum MenuItem {
-    Home,
-    Preparation,
-    Run,
-    Quit,
-}
-
-impl From<MenuItem> for usize {
-    fn from(input: MenuItem) -> usize {
-        match input {
-            MenuItem::Preparation => 0,
-            MenuItem::Run => 1,
-            MenuItem::Home => 2,
-            MenuItem::Quit => 3,
-        }
-    }
+    Home = 0,
+    Preparation = 1,
+    Run = 2,
+    Quit = 3,
 }
 
 pub fn input_controller(millis: u64, tx: Sender<GoLEvent>) {
@@ -107,7 +94,7 @@ pub fn render_menu(menu_titles: Vec<&str>) -> Vec<Spans> {
 pub fn render_tabs(menu: Vec<Spans>, option: MenuItem) -> Tabs {
     Tabs::new(menu)
         // Default option to be selected when app starts
-        .select(option.into())
+        .select(option as usize)
         .block(Block::default().title("Menu").borders(Borders::ALL))
         .style(Style::default().fg(Color::White))
         .highlight_style(Style::default().fg(Color::Yellow))
